@@ -1,0 +1,37 @@
+version: '3'
+
+services:
+  # Phoenixアプリケーションに関する定義
+  demo_app:
+    build:
+      context: .
+    # コンテナ起動時にサーバーを立ち上げる
+    command: mix phx.server
+    # 環境変数設定
+    environment:
+      MIX_TEST_DB_HOST: demo_db
+    ports:
+      - 4000:4000
+    # コンテナ開始前にPostgresを立ち上げる
+    depends_on:
+      - demo_db
+    # ボリューム名:コンテナ側のパスをそれぞれ設定する（アプリケーションと利用するnode_modules）
+    volumes:
+      - .:/app
+      - demo_app_node_modules:/app/assets/node_modules
+  # Postgresに関する定義
+  demo_db:
+    image: postgres:9.6-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - 5432:5432
+    # ボリューム名:コンテナ側のパスをそれぞれ設定する（アプリケーションで利用するPostgresのデータ格納場所）
+    volumes:
+      - demo_db_data:/var/lib/postgresql/data
+
+# ボリューム名
+volumes:
+  demo_app_node_modules:
+  demo_db_data:
